@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Semanal · Edwin Barber</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --card: #1a1a1a;
+    --border: #272727;
+    --gold: #c9a84c;
+    --gold-light: #e8c870;
+    --green: #4caf7d;
+    --red: #e05c5c;
+    --blue: #5c9de0;
+    --purple: #9b6de0;
+    --text: #f0ede8;
+    --muted: #666;
+    --sub: #999;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+  }
+
+  header { text-align: center; margin-bottom: 32px; }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 8vw, 3.8rem);
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  header p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .divider { width: 50px; height: 2px; background: var(--gold); margin: 14px auto; opacity: 0.4; }
+
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  .sec {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+    color: var(--gold-light);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* PIE */
+  .pie-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .pie-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pie-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .pie-center span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .pie-center small {
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .leg-item { display: flex; align-items: center; gap: 8px; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .leg-label { font-size: 0.8rem; flex: 1; }
+  .leg-pct { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; }
+
+  /* GASTOS FIJOS */
+  .fijos-note {
+    background: rgba(92,157,224,0.06);
+    border: 1px solid rgba(92,157,224,0.15);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--sub);
+  }
+  .fijos-note strong { color: var(--blue); }
+  .fijo-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(92,157,224,0.1);
+  }
+  .fijo-row:last-child { border-bottom: none; }
+  .fijo-val { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--blue); }
+
+  /* CALCULATOR */
+  .calc-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .calc-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+
+  .currency {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    max-width: 300px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+appearance: textfield;
+    text-align: center;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus { border-color: var(--gold); }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .res-card {
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid transparent;
+    text-align: center;
+  }
+
+  .res-card.moto    { background: rgba(76,175,125,0.08); border-color: rgba(76,175,125,0.2); }
+  .res-card.cap     { background: rgba(155,109,224,0.08); border-color: rgba(155,109,224,0.2); }
+  .res-card.colchon { background: rgba(92,157,224,0.08); border-color: rgba(92,157,224,0.2); }
+  .res-card.libre   { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.2); }
+
+  .res-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .res-card.moto    .res-label { color: var(--green); }
+  .res-card.cap     .res-label { color: var(--purple); }
+  .res-card.colchon .res-label { color: var(--blue); }
+  .res-card.libre   .res-label { color: var(--gold); }
+
+  .res-val { font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--text); }
+  .res-sub { font-size: 0.65rem; color: var(--muted); margin-top: 3px; }
+
+  .deuda-alert {
+    display: none;
+    margin-top: 14px;
+    background: rgba(224,92,92,0.08);
+    border: 1px solid rgba(224,92,92,0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    color: var(--sub);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .deuda-alert strong { color: #e05c5c; }
+  .deuda-alert.visible { display: block; }
+
+  /* CAPRICHOS */
+  .cap-order {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .cap-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cap-item:last-child { border-bottom: none; }
+
+  .cap-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--border);
+    flex-shrink: 0;
+    line-height: 1;
+    width: 24px;
+    text-align: center;
+  }
+
+  .cap-info { flex: 1; }
+  .cap-name { font-size: 0.85rem; font-weight: 500; margin-bottom: 2px; }
+  .cap-detail { font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  .cap-months {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--purple);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* REGLAS */
+  .rules-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .rule {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .rule:last-child { border-bottom: none; }
+  .rule-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+  .rule-title { font-size: 0.82rem; font-weight: 600; margin-bottom: 3px; }
+  .rule-desc { font-size: 0.75rem; color: var(--sub); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sistema Semanal</h1>
+  <p>Edwin Barber · Por porcentaje de lo que entra</p>
+  <div class="divider"></div>
+</header>
+
+<div class="wrap">
+
+  <!-- PIE -->
+  <div class="sec">Distribución del ingreso</div>
+  <div class="pie-section">
+    <div class="pie-wrap">
+      <canvas id="pie" width="160" height="160"></canvas>
+      <div class="pie-center">
+        <span>100%</span>
+        <small>INGRESO</small>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="leg-item">
+        <div class="leg-dot" style="background:#4caf7d"></div>
+        <div class="leg-label">🏍️ Fondo moto</div>
+        <div class="leg-pct" style="color:#4caf7d">35%</div>
+      </div>
+      <div class="leg-item">
+        <div class="leg-dot" style="background:#9b6de0"></div>
+        <div class="leg-label">✨ Caprichos</div>
+        <div class="leg-pct" style="color:#9b6de0">15%</div>
+      </div>
+      <div class="leg-item">
+        <div class="leg-dot" style="background:#5c9de0"></div>
+        <div class="leg-label">🛡️ Colchón</div>
+        <div class="leg-pct" style="color:#5c9de0">10%</div>
+      </div>
+      <div class="leg-item">
+        <div class="leg-dot" style="background:#c9a84c"></div>
+        <div class="leg-label">💸 Libre</div>
+        <div class="leg-pct" style="color:#c9a84c">40%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GASTOS FIJOS -->
+  <div class="sec">Gastos fijos (antes del cálculo)</div>
+  <div class="fijos-note">
+    <strong>Saca esto primero, antes de aplicar los porcentajes:</strong><br><br>
+    <div class="fijo-row"><span>Gasolina semanal</span><span class="fijo-val">~$25.000</span></div>
+    <div class="fijo-row"><span>Gastos hormiga est.</span><span class="fijo-val">~$15.000</span></div>
+    <div class="fijo-row"><span><strong>Total a sacar primero</strong></span><span class="fijo-val" style="color:#e8c870">~$40.000</span></div>
+    <br>
+    La <strong>deuda mensual ($120.000)</strong> la sacás el primer sábado del mes de tu plata <strong style="color:var(--gold)">libre (40%)</strong>.
+  </div>
+
+  <!-- CALCULADORA -->
+  <div class="sec">Calculadora del fin de semana</div>
+  <div class="calc-section">
+    <div class="calc-label">¿Cuánto ganaste? (ya sin los $40K fijos)</div>
+    <div class="input-row">
+      <span class="currency">$</span>
+      <input type="number" id="ingreso" placeholder="Ej: 150000" min="0" step="1000">
+    </div>
+    <div class="results-grid">
+      <div class="res-card moto">
+        <div class="res-label">🏍️ Moto (35%)</div>
+        <div class="res-val" id="r-moto">$0</div>
+        <div class="res-sub">Aparta ya · Nequi</div>
+      </div>
+      <div class="res-card cap">
+        <div class="res-label">✨ Caprichos (15%)</div>
+        <div class="res-val" id="r-cap">$0</div>
+        <div class="res-sub">Aparta ya · Nequi</div>
+      </div>
+      <div class="res-card colchon">
+        <div class="res-label">🛡️ Colchón (10%)</div>
+        <div class="res-val" id="r-col">$0</div>
+        <div class="res-sub">Intocable · Nequi</div>
+      </div>
+      <div class="res-card libre">
+        <div class="res-label">💸 Libre (40%)</div>
+        <div class="res-val" id="r-lib">$0</div>
+        <div class="res-sub">Pa' gastar + deuda</div>
+      </div>
+    </div>
+    <div class="deuda-alert" id="deuda-alert">
+      📅 <strong>¡Primer sábado del mes!</strong> Recuerda pagar los <strong>$120.000 de deuda</strong> de tu plata libre.
+    </div>
+  </div>
+
+  <!-- CAPRICHOS EN ORDEN -->
+  <div class="sec">Caprichos en orden</div>
+  <div class="cap-order">
+    <div class="cap-item">
+      <div class="cap-num">1</div>
+      <div class="cap-info">
+        <div class="cap-name">🎒 Maleta</div>
+        <div class="cap-detail">~$300.000</div>
+      </div>
+      <div class="cap-months">≈ 3 meses<br>@ $100K/mes</div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-num">2</div>
+      <div class="cap-info">
+        <div class="cap-name">🌿 Loción</div>
+        <div class="cap-detail">~$200.000</div>
+      </div>
+      <div class="cap-months">≈ 2 meses<br>@ $100K/mes</div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-num">3</div>
+      <div class="cap-info">
+        <div class="cap-name">⌚ Reloj</div>
+        <div class="cap-detail">~$300.000 – $400.000</div>
+      </div>
+      <div class="cap-months">≈ 3–4 meses<br>@ $100K/mes</div>
+    </div>
+  </div>
+
+  <!-- REGLAS -->
+  <div class="sec">Las 4 reglas del sistema</div>
+  <div class="rules-section">
+    <div class="rule">
+      <div class="rule-icon">⚡</div>
+      <div>
+        <div class="rule-title">Aparta inmediato</div>
+        <div class="rule-desc">Apenas llegues a casa el domingo, haz la distribución. No esperes al lunes, la plata se va sola.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">🔒</div>
+      <div>
+        <div class="rule-title">El colchón es intocable</div>
+        <div class="rule-desc">Solo se usa si un mes ganás muy poco para cubrir la deuda fija. Nada más.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">📈</div>
+      <div>
+        <div class="rule-title">Semanas buenas = moto primero</div>
+        <div class="rule-desc">Si ganás más de lo normal, el extra va al fondo moto en Nequi. Acelera la meta.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">📅</div>
+      <div>
+        <div class="rule-title">Deuda: primer sábado del mes</div>
+        <div class="rule-desc">Los $120.000 salen del 40% libre. Págala el primer fin de semana sin excusas.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // PIE CHART
+  const canvas = document.getElementById('pie');
+  const ctx = canvas.getContext('2d');
+  const slices = [
+    { pct: 0.35, color: '#4caf7d' },
+    { pct: 0.15, color: '#9b6de0' },
+    { pct: 0.10, color: '#5c9de0' },
+    { pct: 0.40, color: '#c9a84c' },
+  ];
+  let startAngle = -Math.PI / 2;
+  const cx = 80, cy = 80, r = 65, inner = 38;
+  slices.forEach(s => {
+    const end = startAngle + s.pct * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, end);
+    ctx.closePath();
+    ctx.fillStyle = s.color;
+    ctx.fill();
+    startAngle = end;
+  });
+  ctx.beginPath();
+  ctx.arc(cx, cy, inner, 0, 2 * Math.PI);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fill();
+
+  // DEUDA ALERT — primeros 7 días del mes
+  if (new Date().getDate() <= 7) {
+    document.getElementById('deuda-alert').classList.add('visible');
+  }
+
+  // CALCULATOR
+  const fmt = n => n === 0 ? '$0' : '$' + Math.round(n).toLocaleString('es-CO');
+  document.getElementById('ingreso').addEventListener('input', function() {
+    const v = parseFloat(this.value) || 0;
+    document.getElementById('r-moto').textContent = fmt(v * 0.35);
+    document.getElementById('r-cap').textContent  = fmt(v * 0.15);
+    document.getElementById('r-col').textContent  = fmt(v * 0.10);
+    document.getElementById('r-lib').textContent  = fmt(v * 0.40);
+  });
+</script>
+</body>
+</html>
